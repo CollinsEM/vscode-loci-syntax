@@ -7,6 +7,7 @@
     { "include": "#dollarIdentifiers" },
     { "include": "#includes" },
     { "include": "#ruleDecl" },
+    { "include": "#rulePhaseKeyword" },
     { "include": "#typeDecl" },
     { "include": "#cppBlock" }
   ],
@@ -69,7 +70,7 @@
           "patterns": [
             {
               "name": "support.function.rule-kind.loci",
-              "match": "\\b(pointwise|singleton|apply|unit|optional|default|constraint)\\b"
+              "match": "\\b(pointwise|singleton|apply|unit|optional|default|constraint|blackbox)\\b"
             },
             {
               "name": "meta.rule.head.loci",
@@ -80,14 +81,14 @@
               "patterns": [
                 {
                   "name": "meta.rule.output.loci",
-                  "match": "([A-Za-z_][A-Za-z0-9_]*)(?:\\{[^}]*\\})?(?:\\([^)]*\\))?(?=\\s*(<-ci->|<-|->))",
+                  "match": "((?:\\$?[A-Za-z_][A-Za-z0-9_]*)(?:::(?:[A-Za-z_][A-Za-z0-9_]*))*)(?:\\{[^}]*\\})?(?:\\([^)]*\\))?(?=\\s*(<-ci->|<-|->))",
                   "captures": {
                     "1": { "name": "entity.name.function.rule-output.loci" }
                   }
                 },
                 {
                   "name": "meta.rule.input.loci",
-                  "match": "(?<=<-|->)\\s*([A-Za-z_][A-Za-z0-9_]*)(?:\\{[^}]*\\})?(?:\\([^)]*\\))?",
+                  "match": "(?<=<-|->)\\s*((?:\\$?[A-Za-z_][A-Za-z0-9_]*)(?:::(?:[A-Za-z_][A-Za-z0-9_]*))*)(?:\\{[^}]*\\})?(?:\\([^)]*\\))?",
                   "captures": {
                     "1": { "name": "variable.parameter.rule-input.loci" }
                   }
@@ -111,11 +112,11 @@
                   "end": "\\)",
                   "endCaptures": { "0": { "name": "punctuation.section.parens.end.loci" } },
                   "patterns": [
-                    { "name": "variable.parameter.rule-input.loci", "match": "[A-Za-z_][A-Za-z0-9_]*" },
+                    { "name": "variable.parameter.rule-input.loci", "match": "(?:\\$?[A-Za-z_][A-Za-z0-9_]*)(?:::(?:[A-Za-z_][A-Za-z0-9_]*))*" },
                     { "name": "punctuation.separator.delimiter.loci", "match": "," }
                   ]
                 },
-                { "name": "variable.other.rule-head.loci", "match": "[A-Za-z_][A-Za-z0-9_]*" },
+                { "name": "variable.other.rule-head.loci", "match": "(?:\\$?[A-Za-z_][A-Za-z0-9_]*)(?:::(?:[A-Za-z_][A-Za-z0-9_]*))*" },
                 { "name": "punctuation.separator.delimiter.loci", "match": "," }
               ]
             },
@@ -144,22 +145,19 @@
             },
             {
               "name": "meta.rule.modifier.loci",
-              "begin": ",\\s*((option|constraint))\\s*\\(",
+              "begin": ",\\s*((comments|conditional|constraint|inplace|option|parametric))\\s*(\\()",
               "beginCaptures": {
                 "1": { "name": "keyword.control.modifier.loci" },
-                "2": { "name": "keyword.control.modifier.loci" }
+                "2": { "name": "keyword.control.modifier.loci" },
+                "3": { "name": "punctuation.section.parens.begin.loci" }
               },
               "end": "\\)",
               "endCaptures": { "0": { "name": "punctuation.section.parens.end.loci" } },
               "patterns": [
-                { "name": "variable.parameter.rule-input.loci", "match": "[A-Za-z_][A-Za-z0-9_]*" },
-                { "name": "punctuation.separator.delimiter.loci", "match": "," }
+                { "include": "#ruleModifierArgs" }
               ]
             },
-            {
-              "name": "keyword.control.block.loci",
-              "match": ",\\s*(prelude|compute)\\b"
-            },
+            { "include": "#rulePhaseKeyword" },
             { "name": "punctuation.separator.delimiter.loci", "match": "," },
             {
               "name": "meta.rule.decorator.brackets.loci",
@@ -175,11 +173,39 @@
         }
       ]
     },
+    "rulePhaseKeyword": {
+      "patterns": [
+        {
+          "name": "keyword.control.rule-statement.loci",
+          "match": "\\b(prelude|compute|postlude)\\b(?=\\s*\\{)"
+        }
+      ]
+    },
+    "ruleModifierArgs": {
+      "patterns": [
+        { "include": "#strings" },
+        { "include": "#numbers" },
+        { "include": "#dollarIdentifiers" },
+        {
+          "name": "meta.rule.modifier.group.loci",
+          "begin": "\\(",
+          "beginCaptures": { "0": { "name": "punctuation.section.parens.begin.loci" } },
+          "end": "\\)",
+          "endCaptures": { "0": { "name": "punctuation.section.parens.end.loci" } },
+          "patterns": [
+            { "include": "#ruleModifierArgs" }
+          ]
+        },
+        { "name": "keyword.operator.arrow.loci", "match": "<-ci->|ci->|<-|->|\\|" },
+        { "name": "variable.parameter.rule-input.loci", "match": "(?:\\$?[A-Za-z_][A-Za-z0-9_]*)(?:::(?:[A-Za-z_][A-Za-z0-9_]*))*" },
+        { "name": "punctuation.separator.delimiter.loci", "match": "," }
+      ]
+    },
     "typeDecl": {
       "patterns": [
         {
           "name": "meta.type.loci",
-          "match": "^\\s*(\\$type)\\s+([A-Za-z_][A-Za-z0-9_]*)(?:\\(\\s*([A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*[A-Za-z_][A-Za-z0-9_]*)*)\\s*\\))?\\s+((?:const_)?(?:store|param|multiMap|Map|blackbox))\\s*<([^>]+)>",
+          "match": "^\\s*(\\$type)\\s+([A-Za-z_][A-Za-z0-9_]*)(?:\\(\\s*([A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*[A-Za-z_][A-Za-z0-9_]*)*)\\s*\\))?\\s+((?:const_)?(?:store|storeVec|param|multiMap|Map|MapVec|blackbox)|Constraint)(?:\\s*<(.+?)>)?",
           "captures": {
             "1": { "name": "keyword.declaration.loci" },
             "2": { "name": "entity.name.type.loci" },

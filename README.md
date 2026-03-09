@@ -3,8 +3,8 @@
 Syntax highlighting for the Loci DSL used to describe rules, data dependencies, and computation steps in Loci-based applications.
 
 ## What this extension highlights
-- Loci directives and declarations like `$include`, `$type`, type names, storage kinds (`store`, `param`, `const_store`, etc.), and `$rule` forms (`pointwise`, `singleton`, `apply`, `unit`, `default`, `optional`).
-- Rule modifiers and helpers: `constraint(...)`, `conditional(...)`, `option(...)`, `inplace(...)`, `prelude`/`postlude`, Loci reduction tags (`[Loci::Summation]`), constants like `EMPTY`/`UNIVERSE`.
+- Loci directives and declarations like `$include`, `$type`, type names, storage kinds (`store`, `storeVec`, `param`, `Map`, `MapVec`, `blackbox`, `Constraint`, etc.), and `$rule` forms (`pointwise`, `singleton`, `apply`, `unit`, `default`, `optional`, `constraint`, `blackbox`).
+- Rule modifiers and helpers: `constraint(...)`, `conditional(...)`, `option(...)`, `inplace(...)`, `parametric(...)`, `comments(...)`, `prelude`/`compute`/`postlude`, Loci reduction tags (`[Loci::Summation]`), constants like `EMPTY`/`UNIVERSE`.
 - `$`-prefixed variables (including `$variable{n=0}`) and Loci namespace calls (`Loci::load_module`, `Loci::makeQuery`, etc.).
 - Comments (`//`, `/* */`), string and numeric literals, and the `<-ci->`, `<-`, `->` arrows used in rule heads.
 - Mixed Loci/C++: unmatched content falls back to the built-in C++ grammar, especially inside `{ ... }` blocks.
@@ -44,9 +44,9 @@ Syntax highlighting for the Loci DSL used to describe rules, data dependencies, 
 - Adjust colors to taste. These scopes come from `syntaxes/loci.tmlLanguage.json` and override your theme for Loci files.
 
 ## Rule anatomy (quick reference)
-- `$rule` keyword and rule kind (`pointwise`, `singleton`, `apply`, `unit`, `default`, `optional`).
+- `$rule` keyword and rule kind (`pointwise`, `singleton`, `apply`, `unit`, `default`, `optional`, `constraint`, `blackbox`).
 - Rule head: outputs before the rightmost `<-`, inputs after it; the arrow is highlighted separately.
-- Trailing modifiers: `option(...)`, `constraint(...)`; markers like `prelude`, `compute`.
+- Trailing modifiers: `constraint(...)`, `conditional(...)`, `inplace(...)`, `option(...)`, `parametric(...)`, `comments(...)`; markers like `prelude`, `compute`, `postlude`.
 
 ## Example
 ```loci
@@ -82,6 +82,40 @@ npx @vscode/vsce package
 ```
   - Outputs `loci-syntax-<version>.vsix`; install via `code --install-extension loci-syntax-*.vsix`.
   - If `vsce` warns about a missing `repository` field, add your Git repo URL to `package.json` or pass `--allow-missing-repository`.
+
+## Publish to Marketplace
+- Publisher for this repo: `StreamlineNumerics` (see `package.json`).
+- Before publishing, bump the extension version in `package.json`.
+- Create or confirm a Visual Studio Marketplace publisher named `StreamlineNumerics`.
+- Create an Azure DevOps personal access token with Marketplace `Manage` permission.
+- Log in once on this machine:
+```bash
+npx @vscode/vsce login StreamlineNumerics
+```
+- Publish a new version directly:
+```bash
+npm install
+npm run compile
+npx @vscode/vsce publish
+```
+- Or publish while bumping the version automatically:
+```bash
+npx @vscode/vsce publish patch
+```
+```bash
+npx @vscode/vsce publish minor
+```
+```bash
+npx @vscode/vsce publish major
+```
+- If you prefer uploading through the website instead of direct CLI publish:
+```bash
+npm install
+npm run compile
+npx @vscode/vsce package
+```
+  - Then upload the generated `.vsix` at `https://marketplace.visualstudio.com/manage/publishers/`.
+- Official docs: `https://code.visualstudio.com/api/working-with-extensions/publishing-extension`
 
 ## Contributing
 - Adjust scopes in `syntaxes/loci.tmlLanguage.json`.
