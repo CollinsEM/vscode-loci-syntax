@@ -70,7 +70,7 @@ $rule apply(cl->qresidual<-qdot)[Loci::Summation],
 ---
 
 ## Developer info (build, test, package)
-- Prereqs: Node.js 20+ (current `@vscode/vsce` needs the global `File` API), npm. If you must stay on Node 18, use `npx @vscode/vsce@2.21.0 package` when packaging.
+- Prereqs: Node.js 20+ for `vsce` packaging/publishing, npm. Node 18 is enough for `npm install` and `npm run compile`, but `npx @vscode/vsce package`, `login`, and `publish` currently fail there with `ReferenceError: File is not defined`.
 - Install deps: `npm install`
 - Build once: `npm run compile` (or `npm run watch` while developing)
 - Run in VS Code: open the folder, press **Run and Debug** (F5) and pick **Run Extension**; reload the Extension Development Host after edits. For a faster loop, run `npm run watch` in the main window while using F5 to reload.
@@ -86,6 +86,7 @@ npx @vscode/vsce package
 ## Publish to Marketplace
 - Publisher for this repo: `StreamlineNumerics` (see `package.json`).
 - Before publishing, bump the extension version in `package.json`.
+- Use Node.js 20+ for the publish step. Current `@vscode/vsce` in this repo declares `node >= 20`, and Node 18 fails during `vsce login/package/publish`.
 - Create or confirm a Visual Studio Marketplace publisher named `StreamlineNumerics`.
 - Create an Azure DevOps personal access token with Marketplace `Manage` permission.
 - Log in once on this machine:
